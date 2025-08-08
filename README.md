@@ -147,3 +147,70 @@ FastAPI provides interactive API docs automatically:
 * **Containerized:** Yes, using Docker
 * **Purpose:** Serve as a minimal starting point for building APIs with FastAPI
 * **Key Feature:** Out-of-the-box automatic OpenAPI documentation
+
+
+
+> # AI Summarization API Integration
+
+## What We Have Implemented
+
+We developed a new FastAPI endpoint `/summarize` that:
+
+- Accepts a **YouTube video transcript** as input in JSON format.
+- Returns an AI-generated **summary** of the transcript.
+
+## Modular LLM Integration
+
+To keep the system flexible and future-proof, the summarization logic is modular and supports multiple LLM providers.  
+
+Currently supported providers:
+
+- **OpenAI**  
+  - Uses the latest OpenAI Python SDK (v1.x).  
+  - Summarizes transcripts by sending prompts to GPT-3.5 or GPT-4 models.  
+  - Requires an OpenAI API key configured via environment variables.
+
+- **Hugging Face Inference API**  
+  - Uses the `facebook/bart-large-cnn` summarization model.  
+  - Calls Hugging Face's public API with an API token.  
+  - Free tier available with some usage limits.
+
+## How It Works
+
+- The API endpoint accepts a POST request with a JSON body containing the `transcript` text.  
+- Based on the configured provider (`LLM_PROVIDER` environment variable), it forwards the transcript to the selected summarizer implementation.  
+- The summarizer calls the corresponding LLM API to generate and return a concise summary.
+
+## Configuration
+
+- Environment variables control API keys and provider selection:
+
+```env
+OPENAI_API_KEY=your_openai_key
+HF_API_TOKEN=your_huggingface_token
+LLM_PROVIDER=huggingface  # or "openai"
+OPENAI_MODEL=gpt-3.5-turbo
+````
+## Usage Example
+
+Request:
+
+```http
+POST /summarize
+Content-Type: application/json
+
+{
+  "transcript": "Long YouTube transcript text..."
+}
+```
+
+Response:
+
+```json
+{
+  "summary": "Concise AI-generated summary of the transcript."
+}
+```
+
+This setup allows easy addition of new LLM providers without modifying the API endpoint or request handling code — just add a new summarizer module and update configuration.
+
